@@ -1,18 +1,20 @@
 #! /usr/bin/env python3
 
 # TODO
-# multiple saves
-# argparse
-# reset stopwatch
+# stop on q press and not enter
 
 import time
 import os
 import art # pip3 install art
 import shutil
 from threading import Thread
+import argparse
+import glob
 
 
 SAVE_DIR = os.path.expanduser("~/.minq_stopwatch/")
+DEFAULT_NAME = "DEFAULT-STOPWATCH"
+
 SAVE_FILE = SAVE_DIR + "last_time"
 SAVE_FILE_TMP = SAVE_FILE + "_tmp"
 
@@ -23,21 +25,39 @@ class Bucket:
 
 
 def main():
-    main_loop()
+    parser = argparse.ArgumentParser(description="A cool stopwatch")
+    parser.add_argument('name', nargs='?', type=str, help="The name of the timer")
+    parser.add_argument('--restart', action='store_true', help="This will restart the stopwatch to 0h0m0s")
+    parser.add_argument('--list', action='store_true', help="This will restart the stopwatch to 0h0m0s")
+    args = parser.parse_args()
+
+    if args.name == None:
+        name = DEFAULT_NAME
+    else:
+        name = args.name
+
+    if args.list:
+        for timer in get_timers():
+            print(timer)
+        return
+
+    if args.restart:
+        print(f"Are you sure you want to restart '{name}'? Press enter to confirm")
+        input()
+        delete_timer(name)
+        return
+
+    main_loop(name)
 
 
-def main_loop():
+def main_loop(timer_name):
 
     if not os.path.isdir(SAVE_DIR):
         os.mkdir(SAVE_DIR)
 
     start = time.time()
-
-    if os.path.isfile(SAVE_FILE):
-        f = open(SAVE_FILE, 'r')
-        elapsed = f.read()
-        f.close()
-        start -= float(elapsed)
+    elapsed = load_time(timer_name)
+    start -= elapsed
 
     running = Bucket(True)
     Thread(target=press_enter, args=(running,)).start()
@@ -60,14 +80,41 @@ def main_loop():
         formatted = center_text_x(formatted)
         print(formatted)
 
-        f = open(SAVE_FILE_TMP, "w")
-        f.write(str(elapsed))
-        f.close()
-
-        os.replace(SAVE_FILE_TMP, SAVE_FILE)
+        save_time(timer_name, elapsed)
 
         time.sleep(1)
 
+
+def get_timers():
+    dir = SAVE_DIR
+    return glob.glob(dir+'*')
+
+def load_time(timer_name):
+    dir = SAVE_DIR + timer_name
+
+    if os.path.isfile(dir):
+        f = open(dir, 'r')
+        elapsed = f.read()
+        f.close()
+        return float(elapsed)
+    else:
+        return 0
+
+def save_time(timer_name, elapsed):
+    dir = SAVE_DIR + timer_name
+    
+    f = open(SAVE_FILE_TMP, "w")
+    f.write(str(elapsed))
+    f.close()
+
+    os.replace(SAVE_FILE_TMP, dir)
+
+def delete_timer(timer_name):
+    dir = SAVE_DIR + timer_name
+    try:
+        os.remove(dir)
+    except FileNotFoundError:
+        print("Timer already deleted...")
 
 def press_enter(running):
     input()
