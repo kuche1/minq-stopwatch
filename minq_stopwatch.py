@@ -2,6 +2,7 @@
 
 # TODO
 # stop on q press and not enter
+# use tmp files
 
 import time
 import os
@@ -10,13 +11,12 @@ import shutil
 from threading import Thread
 import argparse
 import glob
+from tempfile import NamedTemporaryFile
+import shutil
 
 
 SAVE_DIR = os.path.expanduser("~/.minq_stopwatch/")
 DEFAULT_NAME = "DEFAULT-STOPWATCH"
-
-SAVE_FILE = SAVE_DIR + "last_time"
-SAVE_FILE_TMP = SAVE_FILE + "_tmp"
 
 
 class Bucket:
@@ -102,12 +102,12 @@ def load_time(timer_name):
 
 def save_time(timer_name, elapsed):
     dir = SAVE_DIR + timer_name
-    
-    f = open(SAVE_FILE_TMP, "w")
-    f.write(str(elapsed))
-    f.close()
 
-    os.replace(SAVE_FILE_TMP, dir)
+    with NamedTemporaryFile(prefix=f'minq_timer_{timer_name}_', delete=False, mode="w") as f:
+        f.write(str(elapsed))
+        tmp = f.name
+
+    shutil.move(tmp, dir)
 
 def delete_timer(timer_name):
     dir = SAVE_DIR + timer_name
