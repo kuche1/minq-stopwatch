@@ -3,6 +3,7 @@
 # TODO
 # multiple saves
 # argparse
+# reset stopwatch
 
 import time
 import os
