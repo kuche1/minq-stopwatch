@@ -2,7 +2,6 @@
 
 # TODO
 # stop on q press and not enter
-# use tmp files
 
 import time
 import os
@@ -13,6 +12,7 @@ import argparse
 import glob
 from tempfile import NamedTemporaryFile
 import shutil
+import re
 
 
 SAVE_DIR = os.path.expanduser("~/.minq_stopwatch/")
@@ -76,8 +76,8 @@ def main_loop(timer_name):
 
         formatted = f"{elapsed_h}h:{elapsed_min}m:{elapsed_sec}s"
         formatted = art.text2art(formatted)
-        formatted = center_text_x(formatted)
-        formatted = center_text_y(formatted)
+        formatted = fix_the_fucking_default_font(formatted)
+        formatted = center_text(formatted)
         print(formatted)
 
         save_time(timer_name, elapsed)
@@ -117,41 +117,62 @@ def delete_timer(timer_name):
         print("Timer already deleted...")
 
 def press_enter(running):
+    pass
     input()
     running.val = False
 
 
-def center_text_x(txt):
+def fix_the_fucking_default_font(txt):
+
+    while True:
+        res = re.search('^\n +\n', txt)
+        if res == None:
+            break
+        start, end = res.span()
+        txt = txt[end:]
+
+    while True:
+        res = re.search('\n +\n$', txt)
+        if res == None:
+            break
+        start, end = res.span()
+        txt = txt[:start]
+        
+    return txt
+
+
+def center_text(txt):
+
+    # get x size
     longest = 0
     for line in txt.split('\n'):
         l = len(line)
         if l > longest:
             longest = l
 
-    term_width = shutil.get_terminal_size().columns
-    free_space = term_width - longest
+    # get y size
+    size_y = txt.count('\n')
 
-    if free_space <= 0:
-        return txt
-    else:
-        to_insert = int(free_space / 2)
+    term = shutil.get_terminal_size()
+    term_width = term.columns
+    term_height = term.lines
+    
+    free_space_x = term_width - longest
+    free_space_y = term_height - size_y
+
+    if free_space_x > 0:
+        to_insert = int(free_space_x / 2)
         centered = ""
         for line in txt.split('\n'):
             centered += ' '*to_insert + line + '\n'
 
-        return centered
+        txt = centered
 
+    if free_space_y > 0:
+        to_insert = int(free_space_y / 2)
+        txt = ('\n'*to_insert) + txt + ('\n'*to_insert)
 
-def center_text_y(txt):
-    size = txt.count('\n')
-    term_height = shutil.get_terminal_size().lines
-    free_space = term_height - size
-
-    if free_space <= 0:
-        return txt
-    else:
-        to_insert = int(free_space / 2)
-        return ('\n'*to_insert) + txt + ('\n'*to_insert)
+    return txt
 
 
 if __name__ == '__main__':
