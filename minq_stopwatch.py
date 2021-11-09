@@ -76,8 +76,8 @@ def main_loop(timer_name):
 
         formatted = f"{elapsed_h}h:{elapsed_min}m:{elapsed_sec}s"
         formatted = art.text2art(formatted)
-        formatted = center_text_y(formatted)
         formatted = center_text_x(formatted)
+        formatted = center_text_y(formatted)
         print(formatted)
 
         save_time(timer_name, elapsed)
@@ -121,7 +121,7 @@ def press_enter(running):
     running.val = False
 
 
-def center_text_y(txt):
+def center_text_x(txt):
     longest = 0
     for line in txt.split('\n'):
         l = len(line)
@@ -142,7 +142,7 @@ def center_text_y(txt):
         return centered
 
 
-def center_text_x(txt):
+def center_text_y(txt):
     size = txt.count('\n')
     term_height = shutil.get_terminal_size().lines
     free_space = term_height - size
@@ -151,7 +151,7 @@ def center_text_x(txt):
         return txt
     else:
         to_insert = int(free_space / 2)
-        return '\n'*to_insert + txt + '\n'*to_insert
+        return ('\n'*to_insert) + txt + ('\n'*to_insert)
 
 
 if __name__ == '__main__':
