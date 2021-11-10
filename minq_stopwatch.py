@@ -2,6 +2,7 @@
 
 # TODO
 # stop on q press and not enter
+# fix the regex loop
 
 import time
 import os
