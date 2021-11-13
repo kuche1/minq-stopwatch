@@ -1,5 +1,7 @@
 # minq_stopwatch
 
+cp /usr/share/pacman/PKGBUILD.proto PKGBUILD
+
 makepkg -si
 
 makepkg --printsrcinfo > .SRCINFO
