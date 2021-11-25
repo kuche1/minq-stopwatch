@@ -30,6 +30,8 @@ def main():
     parser.add_argument('name', nargs='?', type=str, help="The name of the timer")
     parser.add_argument('--restart', action='store_true', help="This will restart the stopwatch to 0h0m0s")
     parser.add_argument('--list', action='store_true', help="This will restart the stopwatch to 0h0m0s")
+    parser.add_argument('--countdown-hours', type=float, help="This is in hours. Subtracts this from the current time")
+    parser.add_argument('--divide', type=float, help="Divides the resulting time by this")
     args = parser.parse_args()
 
     if args.name == None:
@@ -48,10 +50,14 @@ def main():
         delete_timer(name)
         return
 
-    main_loop(name)
+    countdown = args.countdown_hours
+    if countdown != None:
+        countdown *= 60 * 60 # transform from H to sec
+
+    main_loop(name, countdown, args.divide)
 
 
-def main_loop(timer_name):
+def main_loop(timer_name, countdown, divide):
 
     if not os.path.isdir(SAVE_DIR):
         os.mkdir(SAVE_DIR)
@@ -67,7 +73,14 @@ def main_loop(timer_name):
         now = time.time()
         
         elapsed = now - start
-        elapsed_sec = int(elapsed)
+
+        elapsed_sec = elapsed
+        if countdown != None:
+            elapsed_sec = countdown - elapsed_sec
+        if divide != None:
+            elapsed_sec /= divide
+
+        elapsed_sec = int(elapsed_sec)
 
         elapsed_min = int(elapsed_sec/60)
         elapsed_sec -= elapsed_min * 60
