@@ -1,2 +1,4 @@
 
 *.py diff
+*.md diff
+.gitattributes diff
