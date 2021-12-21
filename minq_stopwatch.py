@@ -6,7 +6,7 @@
 
 import time
 import os
-import art # pip3 install art
+import art # paru -S --needed python-art # pip3 install art
 import shutil
 from threading import Thread
 import argparse
