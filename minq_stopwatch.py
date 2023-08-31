@@ -29,7 +29,7 @@ def main():
     parser = argparse.ArgumentParser(description="A cool stopwatch")
     parser.add_argument('name', nargs='?', type=str, help="The name of the timer")
     parser.add_argument('--restart', action='store_true', help="This will restart the stopwatch to 0h0m0s")
-    parser.add_argument('--list', action='store_true', help="This will restart the stopwatch to 0h0m0s")
+    parser.add_argument('--list', action='store_true', help="Lists all timers")
     parser.add_argument('--countdown-hours', type=float, help="This is in hours. Subtracts this from the current time")
     parser.add_argument('--divide', type=float, help="Divides the resulting time by this")
     args = parser.parse_args()
